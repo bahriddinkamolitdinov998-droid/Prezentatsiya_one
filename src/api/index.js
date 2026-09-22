@@ -1,6 +1,5 @@
 const API_BASE = '/api';
 
-let adminPassword = localStorage.getItem('admin_password') || '';
 let onUnauthorized = null;
 let serverOnline = true;
 const serverListeners = new Set();
@@ -42,28 +41,11 @@ export const checkServer = async () => {
 
 export const setOnUnauthorized = (cb) => { onUnauthorized = cb; };
 
-export const setAdminPassword = (pw) => {
-  adminPassword = pw;
-  if (pw) {
-    localStorage.setItem('admin_password', pw);
-  } else {
-    localStorage.removeItem('admin_password');
-  }
-};
-
-export const getAdminPassword = () => adminPassword;
-
 const headers = () => ({
-  'Content-Type': 'application/json',
-  'x-admin-password': adminPassword
+  'Content-Type': 'application/json'
 });
 
 async function handleResponse(res) {
-  if (res.status === 401) {
-    adminPassword = '';
-    localStorage.removeItem('admin_password');
-    if (onUnauthorized) onUnauthorized();
-  }
   if (!res.ok) {
     let msg = `Xatolik (${res.status})`;
     try {
@@ -191,24 +173,6 @@ export const api = {
       method: 'POST',
       headers: headers(),
       body: JSON.stringify(data)
-    });
-    return handleResponse(res);
-  },
-
-  adminLogin: async (password) => {
-    const res = await fetch(`${API_BASE}/admin/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password })
-    });
-    return handleResponse(res);
-  },
-
-  changePassword: async (newPassword) => {
-    const res = await fetch(`${API_BASE}/admin/password`, {
-      method: 'PUT',
-      headers: headers(),
-      body: JSON.stringify({ newPassword })
     });
     return handleResponse(res);
   },

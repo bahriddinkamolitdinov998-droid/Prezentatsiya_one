@@ -141,7 +141,6 @@ try { db.exec(`ALTER TABLE nasiya ADD COLUMN image TEXT DEFAULT ''`); } catch {}
 try { db.exec(`ALTER TABLE sales ADD COLUMN archived_daily INTEGER DEFAULT 0`); } catch {}
 
 const defaultSettings = {
-  admin_password: '1288',
   shop_name: 'Misol Do\'kon',
   shop_number: '001',
   shop_address: '',
@@ -152,23 +151,11 @@ for (const [key, value] of Object.entries(defaultSettings)) {
   const exists = db.prepare('SELECT value FROM admin_settings WHERE key = ?').get(key);
   if (!exists) {
     db.prepare('INSERT INTO admin_settings (key, value) VALUES (?, ?)').run(key, value);
-  } else if (key === 'admin_password' && (exists.value === 'admin123' || exists.value === '' || exists.value === null)) {
-    db.prepare('UPDATE admin_settings SET value = ? WHERE key = ?').run(value, key);
   }
 }
 
 const authMiddleware = (req, res, next) => {
-  try {
-    const password = req.headers['x-admin-password'];
-    const stored = db.prepare('SELECT value FROM admin_settings WHERE key = ?').get('admin_password');
-    if (!password || password !== stored?.value) {
-      return res.status(401).json({ error: 'Ruxsat yo\'q — admin parolni kiriting' });
-    }
-    next();
-  } catch (err) {
-    console.error('[AUTH ERROR]', err.message);
-    res.status(500).json({ error: 'Server xatolik' });
-  }
+  next();
 };
 
 const getRamInfo = () => {
@@ -536,35 +523,7 @@ app.post('/api/nasiya/:id/sale', (req, res) => {
 });
 
 app.post('/api/admin/login', (req, res) => {
-  try {
-    const { password } = req.body;
-    const stored = db.prepare('SELECT value FROM admin_settings WHERE key = ?').get('admin_password');
-    if (password === stored?.value) {
-      res.json({ success: true });
-    } else {
-      res.status(401).json({ error: 'Noto\'g\'ri parol' });
-    }
-  } catch (err) { console.error('[login]', err.message); res.status(500).json({ error: 'Server xatolik' }); }
-});
-
-app.get('/api/admin/reset-password', (req, res) => {
-  try {
-    const resetKey = req.query.key;
-    if (resetKey === 'misol2024') {
-      db.prepare('UPDATE admin_settings SET value = ? WHERE key = ?').run('1288', 'admin_password');
-      return res.json({ message: 'Parol 1288 ga qayta tiklandi' });
-    }
-    res.status(403).json({ error: 'Ruxsat yo\'q' });
-  } catch (err) { console.error('[reset-pw]', err.message); res.status(500).json({ error: 'Server xatolik' }); }
-});
-
-app.put('/api/admin/password', authMiddleware, (req, res) => {
-  try {
-    const { newPassword } = req.body;
-    if (!newPassword) return res.status(400).json({ error: 'Yangi parol kiritilmagan' });
-    db.prepare('UPDATE admin_settings SET value = ? WHERE key = ?').run(newPassword, 'admin_password');
-    res.json({ message: 'Parol yangilandi' });
-  } catch (err) { console.error('[change-pw]', err.message); res.status(500).json({ error: err.message }); }
+  res.json({ success: true });
 });
 
 app.get('/api/admin/settings', authMiddleware, (req, res) => {

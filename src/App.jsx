@@ -11,7 +11,7 @@ import Admin from './pages/Admin';
 import AIChat from './pages/AIChat';
 import Distributions from './pages/Distributions';
 import Kassa from './pages/Kassa';
-import { LayoutDashboard, ShoppingCart, Package, Banknote, Notebook, TrendingUp, Settings, Bot, CircleCheckBig, CircleX, Info, Lock, Monitor, RefreshCw } from 'lucide-react';
+import { LayoutDashboard, ShoppingCart, Package, Banknote, Notebook, TrendingUp, Settings, Bot, CircleCheckBig, CircleX, Info, Monitor, RefreshCw } from 'lucide-react';
 import './index.css';
 
 const navItems = [
@@ -63,72 +63,6 @@ function Toast() {
       <div className={`toast ${toast.type}`}>
         {toast.type === 'success' ? <CircleCheckBig size={18} /> : toast.type === 'error' ? <CircleX size={18} /> : <Info size={18} />}
         {toast.message}
-      </div>
-    </div>
-  );
-}
-
-function LoginModal() {
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const { showLoginModal, setShowLoginModal, loginAdmin, loginCallback, setLoginCallback } = useApp();
-
-  if (!showLoginModal) return null;
-
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-    const result = await loginAdmin(password);
-    setLoading(false);
-    if (result.ok) {
-      setShowLoginModal(false);
-      setPassword('');
-      if (loginCallback) {
-        loginCallback();
-        setLoginCallback(null);
-      }
-    } else {
-      setError(result.error);
-    }
-  };
-
-  const handleClose = () => {
-    setShowLoginModal(false);
-    setPassword('');
-    setError('');    
-    setLoginCallback(null);
-  };
-
-  return (
-    <div className="modal-overlay" onMouseDown={handleClose}>
-      <div className="modal" style={{ maxWidth: 380 }} onClick={e => e.stopPropagation()} onMouseDown={e => e.stopPropagation()}>
-        <div style={{ textAlign: 'center', marginBottom: 20 }}>
-          <div style={{ fontSize: 40, marginBottom: 8, color: 'var(--primary-light)' }}><Lock size={40} /></div>
-          <h2 style={{ marginBottom: 4 }}>Admin kirish</h2>
-          <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>Davom etish uchun admin parolni kiriting</p>
-        </div>
-        <form onSubmit={handleLogin}>
-          <div className="input-group">
-            <label>Parol</label>
-            <input
-              className="input"
-              type="password"
-              placeholder="Admin parol"
-              value={password}
-              onChange={e => { setPassword(e.target.value); setError(''); }}
-              autoFocus
-            />
-          </div>
-          {error && <p style={{ color: 'var(--danger)', fontSize: 13, marginTop: 8 }}>{error}</p>}
-          <div className="modal-actions" style={{ marginTop: 16 }}>
-            <button type="button" className="btn btn-outline" onClick={handleClose}>Bekor</button>
-            <button type="submit" className="btn btn-primary" disabled={loading || !password}>
-              {loading ? 'Tekshirilmoqda...' : 'Kirish'}
-            </button>
-          </div>
-        </form>
       </div>
     </div>
   );
@@ -206,7 +140,6 @@ function AppLayout() {
         </Routes>
       </main>
       <Toast />
-      <LoginModal />
     </div>
   );
 }

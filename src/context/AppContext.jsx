@@ -1,5 +1,5 @@
-import { createContext, useContext, useState, useCallback, useEffect } from 'react';
-import { api, setAdminPassword, setOnUnauthorized } from '../api';
+import { createContext, useContext, useState, useCallback } from 'react';
+import { api } from '../api';
 
 const AppContext = createContext();
 
@@ -7,47 +7,16 @@ export const useApp = () => useContext(AppContext);
 
 export const AppProvider = ({ children }) => {
   const [cart, setCart] = useState([]);
-  const [isAdmin, setIsAdmin] = useState(() => !!localStorage.getItem('admin_password'));
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState(null);
-  const [showLoginModal, setShowLoginModal] = useState(false);
-  const [loginCallback, setLoginCallback] = useState(null);
 
   const showToast = useCallback((message, type = 'success') => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3000);
   }, []);
 
-  useEffect(() => {
-    setOnUnauthorized(() => {
-      setIsAdmin(false);
-      showToast('Sessiya tugagan. Qaytadan kiring.', 'error');
-    });
-  }, [showToast]);
-
-  const loginAdmin = useCallback(async (password) => {
-    try {
-      await api.adminLogin(password);
-      setAdminPassword(password);
-      setIsAdmin(true);
-      return { ok: true };
-    } catch (err) {
-      return { ok: false, error: err.message || 'Kirishda xatolik' };
-    }
-  }, []);
-
-  const logoutAdmin = useCallback(() => {
-    setAdminPassword('');
-    setIsAdmin(false);
-  }, []);
-
   const requireAdmin = useCallback((callback) => {
-    if (localStorage.getItem('admin_password')) {
-      callback();
-    } else {
-      setLoginCallback(() => callback);
-      setShowLoginModal(true);
-    }
+    callback();
   }, []);
 
   const addToCart = useCallback((product) => {
@@ -112,9 +81,7 @@ export const AppProvider = ({ children }) => {
     <AppContext.Provider value={{
       cart, addToCart, removeFromCart, updateCartQuantity, clearCart,
       cartTotal, cartCount, processSale,
-      isAdmin, setIsAdmin,
-      loginAdmin, logoutAdmin, requireAdmin,
-      showLoginModal, setShowLoginModal, loginCallback, setLoginCallback,
+      requireAdmin,
       loading, setLoading,
       toast, showToast
     }}>

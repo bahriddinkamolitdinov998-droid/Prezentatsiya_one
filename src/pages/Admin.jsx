@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { api } from '../api';
 import { useApp } from '../context/AppContext';
-import { Lock, Package, Coins, LayoutDashboard, Notebook, TriangleAlert, Trash2, Info, Settings, Archive, ShoppingCart, MessageSquare, ClipboardList, Phone, MapPin, X, Calendar, ShoppingBag, Banknote, CreditCard, UserRound, Bot, Camera, ArrowRight } from 'lucide-react';
+import { Package, Coins, LayoutDashboard, Notebook, TriangleAlert, Trash2, Info, Settings, Archive, ShoppingCart, MessageSquare, ClipboardList, Phone, MapPin, X, Calendar, ShoppingBag, Banknote, CreditCard, UserRound, Bot, Camera, ArrowRight } from 'lucide-react';
 import { onProductImgError } from '../utils/media';
 
 export default function Admin() {
@@ -27,9 +27,6 @@ export default function Admin() {
   const [showArchiveDetail, setShowArchiveDetail] = useState(null);
   const [showDistribute, setShowDistribute] = useState(null);
   const [distForm, setDistForm] = useState({ client_name: '', client_phone: '', quantity: '', paid_amount: '', note: '' });
-  const [adminPassword, setAdminPassword] = useState('');
-  const [adminError, setAdminError] = useState('');
-  const [adminLoggingIn, setAdminLoggingIn] = useState(false);
   const [lowStockProducts, setLowStockProducts] = useState([]);
   const [showNasiyaDetail, setShowNasiyaDetail] = useState(null);
   const [nasiyaDetailPayments, setNasiyaDetailPayments] = useState([]);
@@ -37,7 +34,7 @@ export default function Admin() {
   const [nasiyaSelectedDate, setNasiyaSelectedDate] = useState(null);
   const [nasiyaCalendarMonth, setNasiyaCalendarMonth] = useState(() => { const d = new Date(); return { year: d.getFullYear(), month: d.getMonth() }; });
   const qrRef = useRef(null);
-  const { showToast, isAdmin, loginAdmin } = useApp();
+  const { showToast } = useApp();
 
   const roundNum = (n) => {
     if (n >= 1000000) return Math.round(n / 10000) * 10000;
@@ -56,10 +53,8 @@ export default function Admin() {
   });
 
   useEffect(() => {
-    if (isAdmin) {
-      loadAll();
-    }
-  }, [isAdmin]);
+    loadAll();
+  }, []);
 
   const loadAll = async () => {
     setLoading(true);
@@ -453,56 +448,6 @@ export default function Admin() {
     };
     img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
   };
-
-  const handleAdminLogin = async (e) => {
-    e.preventDefault();
-    setAdminLoggingIn(true);
-    setAdminError('');
-    const result = await loginAdmin(adminPassword);
-    setAdminLoggingIn(false);
-    if (result.ok) {
-      setAdminPassword('');
-    } else {
-      setAdminError(result.error);
-    }
-  };
-
-  if (!isAdmin) {
-    return (
-      <div>
-        <div className="page-header">
-          <div>
-            <h1>Admin Panel</h1>
-            <p>Boshqaruv paneli — barcha sozlamalar va ma'lumotlar</p>
-          </div>
-        </div>
-        <div className="card" style={{ maxWidth: 400, margin: '40px auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: 20 }}>
-            <div style={{ marginBottom: 8, color: 'var(--primary-light)' }}><Lock size={40} /></div>
-            <h2 style={{ marginBottom: 4 }}>Admin kirish</h2>
-            <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>Davom etish uchun admin parolni kiriting</p>
-          </div>
-          <form onSubmit={handleAdminLogin}>
-            <div className="input-group">
-              <label>Parol</label>
-              <input
-                className="input"
-                type="password"
-                placeholder="Admin parol"
-                value={adminPassword}
-                onChange={e => { setAdminPassword(e.target.value); setAdminError(''); }}
-                autoFocus
-              />
-            </div>
-            {adminError && <p style={{ color: 'var(--danger)', fontSize: 13, marginTop: 8 }}>{adminError}</p>}
-            <button className="btn btn-primary" style={{ width: '100%', marginTop: 16 }} disabled={adminLoggingIn || !adminPassword}>
-              {adminLoggingIn ? 'Tekshirilmoqda...' : 'Kirish'}
-            </button>
-          </form>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div>
