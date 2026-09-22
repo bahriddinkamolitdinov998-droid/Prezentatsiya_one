@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: savdo-backend
+    runtime: node
+    plan: free
+    autoDeploy: true
+    healthCheckPath: /api/shop-info
+    buildCommand: npm install && npm run build
+    startCommand: node server/index.cjs

@@ -7,7 +7,7 @@ const os = require('os');
 const fs = require('fs');
 
 const app = express();
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 const TZ_OFFSET = 5;
 
 process.on('uncaughtException', (err) => {
@@ -1215,6 +1215,18 @@ app.use((err, req, res, _next) => {
     res.status(500).json({ error: 'Server xatolik' });
   }
 });
+
+const distDir = path.join(__dirname, '..', 'dist');
+if (fs.existsSync(path.join(distDir, 'index.html'))) {
+  app.use(express.static(distDir));
+  app.use((req, res) => {
+    if (req.method === 'GET' && !req.path.startsWith('/api/') && !req.path.startsWith('/uploads/')) {
+      res.sendFile(path.join(distDir, 'index.html'));
+    } else {
+      res.status(404).json({ error: 'Topilmadi' });
+    }
+  });
+}
 
 const server = app.listen(PORT, () => {
   console.log(`[SERVER] ${PORT}-portda ishga tushdi — ${new Date().toLocaleString('uz-UZ')}`);

@@ -1,6 +1,22 @@
-const API_BASE = '/api';
+const API_BASE = import.meta.env.VITE_API_BASE || '/api';
+const BACKEND_ORIGIN = API_BASE.startsWith('http') ? new URL(API_BASE).origin : '';
 
-let onUnauthorized = null;
+function resolvePaths(obj) {
+  if (typeof obj === 'string') {
+    return obj.startsWith('/uploads/') ? BACKEND_ORIGIN + obj : obj;
+  }
+  if (Array.isArray(obj)) {
+    return obj.map(resolvePaths);
+  }
+  if (obj && typeof obj === 'object') {
+    for (const key of Object.keys(obj)) {
+      obj[key] = resolvePaths(obj[key]);
+    }
+    return obj;
+  }
+  return obj;
+}
+
 let serverOnline = true;
 const serverListeners = new Set();
 
@@ -39,8 +55,6 @@ export const checkServer = async () => {
   return serverOnline;
 };
 
-export const setOnUnauthorized = (cb) => { onUnauthorized = cb; };
-
 const headers = () => ({
   'Content-Type': 'application/json'
 });
@@ -54,7 +68,7 @@ async function handleResponse(res) {
     } catch {}
     throw new Error(msg);
   }
-  return res.json();
+  return resolvePaths(await res.json());
 }
 
 export const api = {
